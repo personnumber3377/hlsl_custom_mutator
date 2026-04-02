@@ -1,0 +1,87 @@
+diff --git a/FuzzerDriver.cpp b/FuzzerDriver.cpp
+index 40322e2..9b96c34 100644
+--- a/FuzzerDriver.cpp
++++ b/FuzzerDriver.cpp
+@@ -710,6 +710,12 @@ int FuzzerDriver(int *argc, char ***argv, UserCallback Callback) {
+   Options.TraceMalloc = Flags.trace_malloc;
+   Options.RssLimitMb = Flags.rss_limit_mb;
+   Options.MallocLimitMb = Flags.malloc_limit_mb;
++  // Only custom mutator...
++  if (Flags.custom_only) {
++    // Do the stuff...
++    Printf("INFO: Specified custom_only. Using only the custom mutator.\n");
++    Options.CustomOnly = Flags.custom_only;
++  }
+   if (!Options.MallocLimitMb)
+     Options.MallocLimitMb = Options.RssLimitMb;
+   if (Flags.runs >= 0)
+diff --git a/FuzzerFlags.def b/FuzzerFlags.def
+index b88458a..ce05d78 100644
+--- a/FuzzerFlags.def
++++ b/FuzzerFlags.def
+@@ -173,6 +173,9 @@ FUZZER_FLAG_INT(rss_limit_mb, 2048, "If non-zero, the fuzzer will exit upon "
+ FUZZER_FLAG_INT(malloc_limit_mb, 0, "If non-zero, the fuzzer will exit "
+     "if the target tries to allocate this number of Mb with one malloc call. "
+     "If zero (default) same limit as rss_limit_mb is applied.")
++// Only use the custom mutator?
++FUZZER_FLAG_INT(custom_only, 0,
++    "If 1, only use the custom mutator.")
+ FUZZER_FLAG_STRING(exit_on_src_pos, "Exit if a newly found PC originates"
+     " from the given source location. Example: -exit_on_src_pos=foo.cc:123. "
+     "Used primarily for testing libFuzzer itself.")
+diff --git a/FuzzerLoop.cpp b/FuzzerLoop.cpp
+index 6f415dd..7c2b4be 100644
+--- a/FuzzerLoop.cpp
++++ b/FuzzerLoop.cpp
+@@ -829,6 +829,8 @@ void Fuzzer::ReadAndExecuteSeedCorpora(std::vector<SizedFile> &CorporaFiles) {
+ 
+     // Load and execute inputs one by one.
+     for (auto &SF : CorporaFiles) {
++      // Printf(SF.File.c_str());
++      // fprintf(stderr, "%s", SF.File.c_str());
+       auto U = FileToVector(SF.File, MaxInputLen, /*ExitOnError=*/false);
+       assert(U.size() <= MaxInputLen);
+       RunOne(U.data(), U.size(), /*MayDeleteFile*/ false, /*II*/ nullptr,
+diff --git a/FuzzerMutate.cpp b/FuzzerMutate.cpp
+index 1abce16..fe43b30 100644
+--- a/FuzzerMutate.cpp
++++ b/FuzzerMutate.cpp
+@@ -27,6 +27,26 @@ static void PrintASCII(const Word &W, const char *PrintAfter) {
+ MutationDispatcher::MutationDispatcher(Random &Rand,
+                                        const FuzzingOptions &Options)
+     : Rand(Rand), Options(Options) {
++
++
++  // First check for the custom mutator only stuff...
++
++  if (Options.CustomOnly) {
++    if (!EF->LLVMFuzzerCustomMutator) {
++      exit(1);
++    }
++
++    Mutators.clear();
++    Mutators.push_back({&MutationDispatcher::Mutate_Custom, "Custom"});
++
++    if (EF->LLVMFuzzerCustomCrossOver) {
++      Mutators.push_back({&MutationDispatcher::Mutate_CustomCrossOver,
++                          "CustomCrossOver"});
++    }
++
++    return;
++  }
++
+   DefaultMutators.insert(
+       DefaultMutators.begin(),
+       {
+diff --git a/FuzzerOptions.h b/FuzzerOptions.h
+index 72e2561..d87f731 100644
+--- a/FuzzerOptions.h
++++ b/FuzzerOptions.h
+@@ -30,6 +30,7 @@ struct FuzzingOptions {
+   int MaxTotalTimeSec = 0;
+   int RssLimitMb = 0;
+   int MallocLimitMb = 0;
++  bool CustomOnly = false; // Use only custom mutator?
+   bool DoCrossOver = true;
+   bool CrossOverUniformDist = false;
+   int MutateDepth = 5;

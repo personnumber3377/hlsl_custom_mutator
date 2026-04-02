@@ -11,6 +11,10 @@ from hlsl_unparser import unparse_tu
 SCALAR_TYPES = ["int", "uint", "float", "bool"]
 VECTOR_TYPES = ["float2", "float3", "float4", "int2", "int3", "int4", "uint2", "uint3", "uint4"]
 
+def log(msg: str): # Log a string into the logfile...
+    fh = open("/home/oof/mutator_log.txt", "a+")
+    fh.write("[LOG] "+str(msg)+"\n")
+    fh.close()
 
 class TypeInfo:
     def __init__(self, name: str, array_dims=None):
@@ -427,7 +431,9 @@ def mutate_blob(data: bytes, seed: int | None = None) -> bytes:
         src2 = unparse_tu(tu2).encode("utf-8", errors="ignore")
         h2 = mutate_header(h, rng)
         return pack_blob(h2, src2)
-    except Exception:
+    except Exception as e:
+        # This is disadvantegous, since we are polluting the corpus with invalid files... just return the original data as a fallback for now...
+        '''
         h2 = mutate_header(h, rng)
         raw = bytearray(src_bytes)
         if raw:
@@ -435,3 +441,8 @@ def mutate_blob(data: bytes, seed: int | None = None) -> bytes:
                 idx = rng.randrange(len(raw))
                 raw[idx] ^= 1 << rng.randrange(8)
         return pack_blob(h2, bytes(raw))
+        '''
+
+        log("Got this exception here: "+str(e))
+        log("The data which we mutated looked like this: "+str(data))
+

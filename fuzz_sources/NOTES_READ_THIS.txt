@@ -1,0 +1,6 @@
+The contents of this directory are the contents in the /home/oof/DirectXShaderCompiler/tools/clang/tools/dxclib/ directory...
+
+the fuzzer.cpp file actually contains the fuzzer source code...
+
+
+

@@ -424,25 +424,18 @@ def mutate_blob(data: bytes, seed: int | None = None) -> bytes:
     rng = random.Random(seed)
     h, src_bytes = unpack_blob(data)
 
-    try:
-        src = src_bytes.decode("utf-8", errors="ignore")
-        tu = parse_to_tree(src)
-        tu2 = mutate_translation_unit(tu, rng)
-        src2 = unparse_tu(tu2).encode("utf-8", errors="ignore")
-        h2 = mutate_header(h, rng)
-        return pack_blob(h2, src2)
+    # try:
+    src = src_bytes.decode("utf-8", errors="ignore")
+    tu = parse_to_tree(src)
+    tu2 = mutate_translation_unit(tu, rng)
+    src2 = unparse_tu(tu2).encode("utf-8", errors="ignore")
+    h2 = mutate_header(h, rng)
+    return pack_blob(h2, src2)
+    
+    '''
     except Exception as e:
-        # This is disadvantegous, since we are polluting the corpus with invalid files... just return the original data as a fallback for now...
-        '''
-        h2 = mutate_header(h, rng)
-        raw = bytearray(src_bytes)
-        if raw:
-            for _ in range(1 + rng.randrange(4)):
-                idx = rng.randrange(len(raw))
-                raw[idx] ^= 1 << rng.randrange(8)
-        return pack_blob(h2, bytes(raw))
-        '''
-
+        print("paskaaaa!!"*1000)
         log("Got this exception here: "+str(e))
         log("The data which we mutated looked like this: "+str(data))
-
+        return data
+    '''

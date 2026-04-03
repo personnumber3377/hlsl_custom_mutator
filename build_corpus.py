@@ -9,16 +9,40 @@ def make_fuzz_input(shader_src: bytes) -> bytes:
     header = b"\x00" * HEADER_SIZE
     return header + shader_src + b"\x00"
 
+def strip_comments(data: bytes) -> str:
+    lines = data.decode("utf-8", errors="ignore").splitlines()
+
+    out = []
+    for line in lines:
+        line = line.strip()
+
+        # skip full-line comments
+        if line.startswith("//"):
+            continue
+
+        # remove inline comments
+        if "//" in line:
+            line = line.split("//", 1)[0].rstrip()
+
+        if line:
+            out.append(line)
+
+    return "\n".join(out)
+
 def process_file(in_path, out_path):
     try:
         with open(in_path, "rb") as f:
             data = f.read()
 
-        # skip empty
         if not data.strip():
             return
 
-        out = make_fuzz_input(data)
+        cleaned = strip_comments(data)
+
+        if not cleaned.strip():
+            return
+
+        out = make_fuzz_input(cleaned.encode("utf-8"))
 
         with open(out_path, "wb") as f:
             f.write(out)

@@ -11,7 +11,7 @@ import hlsl_unparser
 
 from header_mutator import mutate_header_precise
 
-HEADER_SIZE = 128
+HEADER_SIZE = 8 # 128
 ENABLE_FALLBACK = False
 
 _initialized = False
@@ -56,6 +56,15 @@ def mutate_bytes_generic(b: bytes, rng: random.Random) -> bytes:
     pos = rng.randrange(len(b))
     return b[:pos] + bytes([b[pos] ^ (1 << rng.randrange(8))]) + b[pos + 1:]
 
+def mutate_bytes_generic_constant_length(b: bytes, rng: random.Random) -> bytes: # Constant length mutations for mutating the header and stuff...
+    if not b:
+        return b # bytes([rng.randrange(256)])
+    orig_len = len(b)
+
+    pos = rng.randrange(len(b))
+    res = b[:pos] + bytes([b[pos] ^ (1 << rng.randrange(8))]) + b[pos + 1:]
+    assert orig_len == len(res) # Should stay constant length...
+    return res
 
 # -----------------------------
 # Structural mutation
@@ -83,7 +92,8 @@ def fuzz(buf: bytearray, add_buf, max_size: int) -> bytearray:
 
     try:
         if len(buf) <= HEADER_SIZE:
-            return bytearray(mutate_bytes_generic(bytes(buf), rng))
+            # raise AttributeError # Just do some bullshit here...
+            return bytearray(mutate_bytes_generic_constant_length(bytes(buf), rng))
 
         header = bytes(buf[:HEADER_SIZE])
         body = bytes(buf[HEADER_SIZE:])
@@ -102,7 +112,7 @@ def fuzz(buf: bytearray, add_buf, max_size: int) -> bytearray:
         out = bytearray()
         out.extend(header)
         out.extend(mutated_body)
-        out.append(0)
+        # out.append(0)
 
         return out[:max_size]
 
@@ -121,5 +131,22 @@ def fuzz(buf: bytearray, add_buf, max_size: int) -> bytearray:
 def custom_mutator(buf: bytearray, add_buf, max_size: int, callback=None) -> bytearray:
     try:
         return fuzz(buf, add_buf, max_size)
-    except Exception:
-        return buf
+
+    except Exception as e:
+        
+        '''
+        import traceback
+        import time
+
+        with open("/home/oof/mutator_log.txt", "a") as f:
+            f.write("\n" + "="*80 + "\n")
+            f.write(f"[TIME] {time.time()}\n")
+            f.write(f"[EXCEPTION] {repr(e)}\n")
+            f.write("[TRACEBACK]\n")
+            f.write(traceback.format_exc())
+            f.write("\n[INPUT]\n")
+            f.write(repr(bytes(buf)))
+            f.write("\n" + "="*80 + "\n")
+        '''
+
+        return buf  # keep corpus stable

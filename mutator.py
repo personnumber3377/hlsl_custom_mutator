@@ -148,5 +148,5 @@ def custom_mutator(buf: bytearray, add_buf, max_size: int, callback=None) -> byt
             f.write(repr(bytes(buf)))
             f.write("\n" + "="*80 + "\n")
         '''
-
-        return buf  # keep corpus stable
+        # Return empty, because otherwise we are wasting cycles on redundant inputs...
+        return bytearray([]) # buf  # keep corpus stable

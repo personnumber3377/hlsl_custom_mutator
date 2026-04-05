@@ -25,6 +25,8 @@ def unparse_expr(e: Expr) -> str:
         return f"{unparse_expr(e.base)}[{unparse_expr(e.index)}]"
     if isinstance(e, MemberExpr):
         return f"{unparse_expr(e.base)}.{e.member}"
+    if isinstance(e, InitListExpr):
+        return "{ " + ", ".join(unparse_expr(x) for x in e.elems) + " }"
     raise TypeError(type(e))
 
 

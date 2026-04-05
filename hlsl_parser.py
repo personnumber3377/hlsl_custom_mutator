@@ -167,6 +167,16 @@ class Parser:
             self.expect(")")
             return e
 
+        if t.kind == "{":
+            self.advance()
+            elems = []
+
+            if not self.match("}"):
+                while True:
+                    elems.append(self.parse_expr(0))
+                    if self.match("}"):
+                        break
+
         if t.kind == "INT":
             self.advance()
             s = t.value.lower().rstrip("u")

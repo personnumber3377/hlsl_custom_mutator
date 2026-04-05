@@ -5,8 +5,15 @@ import os
 
 HEADER_SIZE = 8
 
+# def strip(buf: bytes) -> bytes:
+#     return buf[HEADER_SIZE:].rstrip(b"\x00")
+
 def strip(buf: bytes) -> bytes:
-    return buf[HEADER_SIZE:].rstrip(b"\x00")
+    # print(buf)
+    # print(type(buf))
+    if "\x00" not in buf: # Check for null bytes here...
+        return buf # No null bytes so just return the thing...
+    return buf[HEADER_SIZE:].rstrip("\x00")
 
 def run_dxc(bin_path, file_path):
     try:

@@ -307,8 +307,14 @@ class Parser:
 
         dims = self.parse_array_dims()
         semantic = self.parse_semantic()
-
-        return FunctionParam(tname, pname, dims, semantic, modifiers)
+        return FunctionParam(
+            type_name=tname,
+            name=pname,
+            array_dims=dims,
+            semantic=semantic,
+            modifiers=modifiers
+        )
+        # return FunctionParam(tname, pname, dims, semantic, modifiers)
 
     def parse_decl_stmt(self) -> DeclStmt:
         tname = self.parse_type_name()

@@ -79,13 +79,14 @@ class InitListExpr(Expr):
         self.elements = elements
 
 # Function parameters. This needs to be a separate class since there are modifiers such as "inout" etc..
+
+@dataclass
 class FunctionParam:
-    def __init__(self, tname, name, dims, semantic, modifiers=None):
-        self.tname = tname
-        self.name = name
-        self.dims = dims
-        self.semantic = semantic
-        self.modifiers = modifiers or []
+    type_name: TypeName
+    name: Optional[str]
+    array_dims: List[Optional[Expr]] = field(default_factory=list)
+    semantic: Optional[str] = None
+    modifiers: List[str] = field(default_factory=list)
 
 # Initializer list...
 class InitListExpr(Expr):
@@ -115,12 +116,14 @@ class VarDecl:
     init: Optional[Expr] = None
     semantic: Optional[str] = None
 
+'''
 @dataclass
 class FunctionParam:
     type_name: TypeName
     name: Optional[str]
     array_dims: List[Optional[Expr]] = field(default_factory=list)
     semantic: Optional[str] = None
+'''
 
 @dataclass
 class Attribute:

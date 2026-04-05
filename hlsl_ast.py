@@ -87,6 +87,11 @@ class FunctionParam:
         self.semantic = semantic
         self.modifiers = modifiers or []
 
+# Initializer list...
+class InitListExpr(Expr):
+    def __init__(self, elems):
+        self.elems = elems
+
 # ---------- Types / decls ----------
 
 @dataclass

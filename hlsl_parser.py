@@ -245,6 +245,22 @@ class Parser:
         t = self.peek()
         if (t.kind == "KW" and t.value in TYPELIKE_KEYWORDS) or t.kind == "ID":
             name = self.advance().value
+
+            # handle templates
+            if self.match("<"):
+                depth = 1
+                template_tokens = []
+                while depth > 0:
+                    t = self.advance()
+                    if t.kind == "<":
+                        depth += 1
+                    elif t.kind == ">":
+                        depth -= 1
+                        if depth == 0:
+                            break
+                    template_tokens.append(t.value)
+
+                name += "<" + "".join(template_tokens) + ">"
             return TypeName(name=name, qualifiers=qualifiers)
 
         raise ParseError(f"Expected type name at {t.pos}, got {t.kind}:{t.value}")

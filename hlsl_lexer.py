@@ -14,6 +14,7 @@ KEYWORDS = {
     "Texture2D", "TextureCube", "RWTexture2D", "SamplerState", "cbuffer",
 }
 
+# This is hack around all the weird "types" in HLSL which are actually constructors, but are syntactically identical to types. Yuck!!!
 TYPELIKE_KEYWORDS = {
     "void", "bool", "int", "uint", "float", "half", "double",
     "min16float", "min16int", "min16uint",
@@ -24,6 +25,7 @@ TYPELIKE_KEYWORDS = {
     "bool2", "bool3", "bool4",
     "float2x2", "float3x3", "float4x4",
     "matrix",
+    "cbuffer", "tbuffer", # All kinds of buffers...
 }
 
 QUALIFIERS = {

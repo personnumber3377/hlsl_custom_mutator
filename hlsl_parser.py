@@ -189,6 +189,20 @@ class Parser:
         if t.kind in ("ID", "KW"):
             self.advance()
             return Identifier(t.value)
+        '''
+        if t.kind == "{": # Like 
+            self.advance()
+            elems = []
+
+            if not self.match("}"):
+                while True:
+                    elems.append(self.parse_expr(0))
+                    if self.match("}"):
+                        break
+                    self.expect(",")
+
+            return InitListExpr(elems)
+        '''
 
         raise ParseError(f"Unexpected token in expression at {t.pos}: {t.kind}:{t.value}")
 
@@ -265,13 +279,22 @@ class Parser:
         return StructDef(name, fields)
 
     def parse_param(self) -> FunctionParam:
+        modifiers = []
+
+        # 👇 NEW: consume param modifiers
+        while self.peek().kind == "KW" and self.peek().value in ("in", "out", "inout", "uniform"):
+            modifiers.append(self.advance().value)
+
         tname = self.parse_type_name()
+
         pname = None
         if self.peek().kind == "ID":
             pname = self.advance().value
+
         dims = self.parse_array_dims()
         semantic = self.parse_semantic()
-        return FunctionParam(tname, pname, dims, semantic)
+
+        return FunctionParam(tname, pname, dims, semantic, modifiers)
 
     def parse_decl_stmt(self) -> DeclStmt:
         tname = self.parse_type_name()

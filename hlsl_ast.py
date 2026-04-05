@@ -74,6 +74,18 @@ class MemberExpr(Expr):
     base: Expr
     member: str
 
+class InitListExpr(Expr):
+    def __init__(self, elements):
+        self.elements = elements
+
+# Function parameters. This needs to be a separate class since there are modifiers such as "inout" etc..
+class FunctionParam:
+    def __init__(self, tname, name, dims, semantic, modifiers=None):
+        self.tname = tname
+        self.name = name
+        self.dims = dims
+        self.semantic = semantic
+        self.modifiers = modifiers or []
 
 # ---------- Types / decls ----------
 

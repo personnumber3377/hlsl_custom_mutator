@@ -3,7 +3,7 @@ import subprocess
 import sys
 import os
 
-HEADER_SIZE = 128
+HEADER_SIZE = 8
 
 def strip(buf: bytes) -> bytes:
     return buf[HEADER_SIZE:].rstrip(b"\x00")
@@ -22,7 +22,7 @@ def run_one(dxc, path, data, fn):
     # 2. parse → unparse
     try:
         src = strip(data).decode("utf-8", errors="ignore")
-
+        print("Parsing this here: "+str(src))
         import hlsl_parser, hlsl_unparser
 
         tu = hlsl_parser.parse_to_tree(src)

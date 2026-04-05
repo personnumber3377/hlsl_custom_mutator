@@ -11,9 +11,13 @@ HEADER_SIZE = 8
 def strip(buf: bytes) -> bytes:
     # print(buf)
     # print(type(buf))
-    if "\x00" not in buf: # Check for null bytes here...
+    if isinstance(buf, bytes): # Check for bytes, if bytes then handle as such...
+        null_b = b"\x00"
+    else:
+        null_b = "\x00"
+    if null_b not in buf: # Check for null bytes here...
         return buf # No null bytes so just return the thing...
-    return buf[HEADER_SIZE:].rstrip("\x00")
+    return buf[HEADER_SIZE:].rstrip(null_b)
 
 def run_dxc(bin_path, file_path):
     try:

@@ -1,4 +1,4 @@
-for file in *.src
+for file in *.src.hlsl
 do
-  mv "$file" "${file%.html}.hlsl"
+  mv "$file" "${file%.src.hlsl}.hlsl"
 done

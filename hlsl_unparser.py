@@ -65,9 +65,13 @@ def unparse_var_decl(v: VarDecl) -> str:
 
 
 def unparse_param(p: FunctionParam) -> str:
-    s = unparse_type(p.type_name)
+    parts = []
+    if getattr(p, "modifiers", None):
+        parts.extend(p.modifiers)
+    parts.append(unparse_type(p.type_name))
     if p.name:
-        s += f" {p.name}"
+        parts.append(p.name)
+    s = " ".join(parts)
     s += unparse_array_dims(p.array_dims)
     s += unparse_semantic(p.semantic)
     return s

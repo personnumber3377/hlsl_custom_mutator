@@ -8,6 +8,9 @@ from hlsl_ast import *
 class ParseError(Exception):
     pass
 
+def dump_tokens(src: str):
+    for t in lex(src):
+        print(f"{t.kind:>8}  {t.value!r}  @{t.pos}")
 
 PRECEDENCE = {
     ",": 1,
@@ -170,12 +173,13 @@ class Parser:
         if t.kind == "{":
             self.advance()
             elems = []
-
             if not self.match("}"):
                 while True:
                     elems.append(self.parse_expr(0))
                     if self.match("}"):
                         break
+                    self.expect(",")
+            return InitListExpr(elems)
 
         if t.kind == "INT":
             self.advance()

@@ -28,6 +28,8 @@ def parse_tests():
 			print(fn + " passed parse test.")
 		except Exception as e:
 			print("Got this exception here: "+str(e)+" for parse test file "+str(fn))
+			print("Dumping tokens...")
+			hlsl_parser.dump_tokens(data)
 			ret = 1
 			continue
 	return ret
